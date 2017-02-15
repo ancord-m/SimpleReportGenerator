@@ -5,8 +5,9 @@ import entities.Page;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.ArrayDeque;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Queue;
 
 /**
  * Данный класс заполняет отчёт.
@@ -33,7 +34,7 @@ public class ReportFormatter {
     }
 
     public void getRawReportData(String rawDataFile){
-        dataParser = new DataParser(rawDataFile, encoding);
+        dataParser = new DataParser(rawDataFile, reportColumns, encoding);
         dataParser.parseData();
     }
 
@@ -42,8 +43,8 @@ public class ReportFormatter {
     public void createReport(String reportOutputName){
         try {
             bufWriter = new BufferedWriter(
-                    new OutputStreamWriter(
-                            new FileOutputStream(reportOutputName), Charset.forName(encoding) )
+                            new OutputStreamWriter(
+                                new FileOutputStream(reportOutputName), Charset.forName(encoding) )
             );
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -51,7 +52,7 @@ public class ReportFormatter {
     }
 
     public void writeDataToReport(){
-        List<String> value = dataParser.getReportEntries();
+      /*  List<String> value = dataParser.getReportEntries();
 
         try {
             for( String s : value){
@@ -68,13 +69,62 @@ public class ReportFormatter {
         } catch (IOException e){
             e.printStackTrace();
         }
+        */
     }
 
     private void writePageHeader() throws IOException{
-        bufWriter.write(reportPage.getLeftIndent());
-        for(Column col : reportColumns){
-            bufWriter.write( col.getTitle() );
-            bufWriter.write( reportPage.getColumnDlmtr() );
+   //     bufWriter.write(reportPage.getLeftIndent());
+        String s = "Experiment";
+        String s2 = "Testere";
+        Queue<Character> charQueue1 = new ArrayDeque<>();
+        Queue<Character> charQueue2 = new ArrayDeque<>();
+
+        for (int i = 0; i < s.length(); i++){
+            charQueue1.add(s.charAt(i));
+        }
+
+        for (int i = 0; i < s2.length(); i++){
+            charQueue2.add(s2.charAt(i));
+        }
+
+        while(!charQueue1.isEmpty() | !charQueue2.isEmpty()){
+            int charCount = 0;
+
+            for (int i = 0; i < 7 & !charQueue1.isEmpty(); i++) {
+                bufWriter.write( charQueue1.poll() );
+                charCount++;
+            }
+
+            if(charCount == 7){
+                bufWriter.write(" ");
+                charCount = 0;
+            } else if(charQueue1.isEmpty()){
+                while(charCount != 7+1){
+                    bufWriter.write(" ");
+                    charCount++;
+                }
+                charCount = 0;
+            }
+
+            for (int i = 0; i < 3 & !charQueue2.isEmpty(); i++) {
+                bufWriter.write( charQueue2.poll() );
+                charCount++;
+            }
+
+            if(charCount == 3){
+                bufWriter.write(" ");
+                charCount = 0;
+            } else if(charQueue1.isEmpty()){
+                while(charCount != 3+1){
+                    bufWriter.write(" ");
+                    charCount++;
+                }
+                charCount = 0;
+            }
+
+            bufWriter.write("\r\n");
+
+            bufWriter.flush();
         }
     }
 }

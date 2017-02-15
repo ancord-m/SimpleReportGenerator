@@ -79,9 +79,9 @@ public class ReportConfigurator {
      * @param columns
      */
     private void setColumnsParams(NodeList columns){
+        reportColumns = new ArrayList<>();
         String title = "";
         int width = -1;
-        reportColumns = new ArrayList<>();
 
         for(int i = 0; i < columns.getLength(); i++){
             NodeList columnsParams = columns.item(i).getChildNodes();

@@ -63,25 +63,6 @@ public class ReportFormatter {
         } catch (IOException e){
             e.printStackTrace(System.out);
         }
-
-      /*
-
-        try {
-            for( String s : value){
-                writePageHeader();
-                String[] mass = s.split("\\t");
-                bufWriter.write(s);
-
-                bufWriter.write(reportPage.getHorizontalBar());
-                bufWriter.write(reportPage.getRightIndent());
-
-                bufWriter.flush();
-            }
-            bufWriter.close();
-        } catch (IOException e){
-            e.printStackTrace();
-        }
-        */
     }
     private void writePageHeader() throws IOException{
         if(reportHeader == null){
@@ -134,17 +115,13 @@ public class ReportFormatter {
         reportHeader.append(reportPage.getHorizontalBar());
     }
 
-    private void writePageEntry(){
-
-    }
-
-    private void writePageHeader2() throws IOException{
-        /*
+    private void writePageEntry() throws IOException{
         boolean allColNotEmpty = true;
 
         while(allColNotEmpty){
             bufWriter.write(reportPage.getLeftIndent());
             for(Column col : reportColumns){
+
                 charCount = 0;
 
                 while( (charCount < col.getWidth() ) & !col.getTitle().isEmpty()){
@@ -172,12 +149,32 @@ public class ReportFormatter {
         bufWriter.write("\r\n");
         bufWriter.write(reportPage.getHorizontalBar());
         bufWriter.flush();
-         */
+    }
 
+    /**
+     *
+     * @param width Ширина в символах, отведенная под заполнение в произвольной колонке.
+     * @param columnEntry Часть записи, которую надо поместить в соответствующую колонку.
+     */
+    private void writePartOfColumnEntry(int width, Queue<Character> columnEntry) throws IOException{
+        charCount = 0;
+        while( (charCount < width ) & !columnEntry.isEmpty()){
+            bufWriter.write(columnEntry.poll());
+            charCount++;
+        }
 
+        if(charCount == width){
+            bufWriter.write(reportPage.getColumnDlmtr());
+        } else if(columnEntry.isEmpty()){
+            while(charCount != width){
+                bufWriter.write(" ");
+                charCount++;
+            }
+            bufWriter.write(reportPage.getColumnDlmtr());
+        }
+    }
 
-
-
+    private void writePageHeader2() throws IOException{
 
 
    //     bufWriter.write(reportPage.getLeftIndent());

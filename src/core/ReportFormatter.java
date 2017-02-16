@@ -57,7 +57,7 @@ public class ReportFormatter {
     public void writeDataToReport(){
         try{
             //TODO здесь должен быть цикл управляющий разбиением на страницы
-            writePageHeader();
+        //    writePageHeader();
             writePageEntry();
 
         } catch (IOException e){
@@ -119,34 +119,24 @@ public class ReportFormatter {
         boolean allColNotEmpty = true;
 
         while(allColNotEmpty){
+            allColNotEmpty = false;
+
             bufWriter.write(reportPage.getLeftIndent());
             for(Column col : reportColumns){
-
-                charCount = 0;
-
-                while( (charCount < col.getWidth() ) & !col.getTitle().isEmpty()){
-                    bufWriter.write(col.getTitle().poll());
-                    charCount++;
-                }
-
-                if(charCount == col.getWidth()){
-                    bufWriter.write(reportPage.getColumnDlmtr());
-                } else if(col.getTitle().isEmpty()){
-                    while(charCount != col.getWidth()){
-                        bufWriter.write(" ");
-                        charCount++;
-                    }
-                    bufWriter.write(reportPage.getColumnDlmtr());
+                for(int i = 0; i < col.getEntries().size(); i++) {
+                    writePartOfColumnEntry(col.getWidth(), col.getEntries().get(i));
+                    allColNotEmpty |= !col.getEntries().get(i).isEmpty();
                 }
             }
             bufWriter.write("\r\n");
             bufWriter.flush();
-            allColNotEmpty = false;
+
+           /* allColNotEmpty = false;
             for(Column col : reportColumns){
-                allColNotEmpty |= !col.getTitle().isEmpty();
-            }
+                allColNotEmpty |= !col.getEntries().get(4).isEmpty();
+            } */
         }
-        bufWriter.write("\r\n");
+
         bufWriter.write(reportPage.getHorizontalBar());
         bufWriter.flush();
     }
@@ -172,6 +162,7 @@ public class ReportFormatter {
             }
             bufWriter.write(reportPage.getColumnDlmtr());
         }
+        bufWriter.flush();
     }
 
     private void writePageHeader2() throws IOException{

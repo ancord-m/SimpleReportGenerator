@@ -1,5 +1,6 @@
 package core;
 
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils;
 import entities.Column;
 import entities.Page;
 
@@ -15,6 +16,8 @@ import java.util.Queue;
  * заполняет её данными, извлечёнными из исходного файла, предоставленного пользователем.
  */
 public class ReportFormatter {
+    private int charCount;
+    private StringBuilder reportHeader;
     private Page reportPage;
     private List<Column> reportColumns;
     private DataParser dataParser;
@@ -52,7 +55,16 @@ public class ReportFormatter {
     }
 
     public void writeDataToReport(){
-      /*  List<String> value = dataParser.getReportEntries();
+        try{
+            //TODO здесь должен быть цикл управляющий разбиением на страницы
+            writePageHeader();
+            writePageEntry();
+
+        } catch (IOException e){
+            e.printStackTrace(System.out);
+        }
+
+      /*
 
         try {
             for( String s : value){
@@ -71,8 +83,103 @@ public class ReportFormatter {
         }
         */
     }
-
     private void writePageHeader() throws IOException{
+        if(reportHeader == null){
+            reportHeader = new StringBuilder();
+            constructHeader();
+        }
+        bufWriter.write(reportHeader.toString());
+        bufWriter.flush();
+    }
+
+    /**
+     * Метод формирует заголовок страницы в виде объекта StringBuilder с целью многократного использования.
+     * Нужные данные, а именно, заголовок и его ширина, храняться в объекте Column.
+     * Здесь они извлекаются, обрамляются необходимыми разделителями и завершаются
+     * горизонтальной чертой, отделяющей строки записей на страницах.
+     * @throws IOException
+     */
+    private void constructHeader() throws IOException{
+        //TODO RightIndent тащит за собой пробел!
+        boolean allColNotEmpty = true;
+
+        while(allColNotEmpty){
+            reportHeader.append(reportPage.getLeftIndent());
+            for(Column col : reportColumns){
+                charCount = 0;
+
+                while( (charCount < col.getWidth() ) & !col.getTitle().isEmpty()){
+                    reportHeader.append(col.getTitle().poll());
+                    charCount++;
+                }
+
+                if(charCount == col.getWidth()){
+                    reportHeader.append(reportPage.getColumnDlmtr());
+                } else if(col.getTitle().isEmpty()){
+                    while(charCount != col.getWidth()){
+                        reportHeader.append(" ");
+                        charCount++;
+                    }
+                    reportHeader.append(reportPage.getColumnDlmtr());
+                }
+            }
+            reportHeader.append("\r\n");
+
+            allColNotEmpty = false;
+            for(Column col : reportColumns){
+                allColNotEmpty |= !col.getTitle().isEmpty();
+            }
+        }
+
+        reportHeader.append(reportPage.getHorizontalBar());
+    }
+
+    private void writePageEntry(){
+
+    }
+
+    private void writePageHeader2() throws IOException{
+        /*
+        boolean allColNotEmpty = true;
+
+        while(allColNotEmpty){
+            bufWriter.write(reportPage.getLeftIndent());
+            for(Column col : reportColumns){
+                charCount = 0;
+
+                while( (charCount < col.getWidth() ) & !col.getTitle().isEmpty()){
+                    bufWriter.write(col.getTitle().poll());
+                    charCount++;
+                }
+
+                if(charCount == col.getWidth()){
+                    bufWriter.write(reportPage.getColumnDlmtr());
+                } else if(col.getTitle().isEmpty()){
+                    while(charCount != col.getWidth()){
+                        bufWriter.write(" ");
+                        charCount++;
+                    }
+                    bufWriter.write(reportPage.getColumnDlmtr());
+                }
+            }
+            bufWriter.write("\r\n");
+            bufWriter.flush();
+            allColNotEmpty = false;
+            for(Column col : reportColumns){
+                allColNotEmpty |= !col.getTitle().isEmpty();
+            }
+        }
+        bufWriter.write("\r\n");
+        bufWriter.write(reportPage.getHorizontalBar());
+        bufWriter.flush();
+         */
+
+
+
+
+
+
+
    //     bufWriter.write(reportPage.getLeftIndent());
         String s = "Experiment";
         String s2 = "Testere";
@@ -88,9 +195,9 @@ public class ReportFormatter {
         }
 
         while(!charQueue1.isEmpty() | !charQueue2.isEmpty()){
-            int charCount = 0;
+            charCount = 0;
 
-            for (int i = 0; i < 7 & !charQueue1.isEmpty(); i++) {
+            for (int i = 0; i < 2 & !charQueue1.isEmpty(); i++) {
                 bufWriter.write( charQueue1.poll() );
                 charCount++;
             }

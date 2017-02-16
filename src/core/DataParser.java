@@ -61,7 +61,7 @@ public class DataParser {
             }
             bufReader.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            e.printStackTrace(System.out);
         }
     }
 

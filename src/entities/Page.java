@@ -8,7 +8,7 @@ public class Page {
     private int pageHeight;
     private StringBuilder horizontalBar;
     private final String PAGE_DELIMITER = "~";
-    private final String COLUMN_DLMTR = "|";
+    private final String COLUMN_DLMTR = " | ";
     private final String LEFT_INDENT = "| ";
     private final String RIGHT_INDENT = " |";
 

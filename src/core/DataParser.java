@@ -38,12 +38,13 @@ public class DataParser {
         this.reportColumns = reportColumns;
     }
 
-    public void parseData(){
+    public int parseData(){
+        int lineCounter = 0;
         String rawDataLine;
         String[] rawDataSublines;
 
         try {
-            for(int lineCounter = 0; (rawDataLine = bufReader.readLine()) != null; lineCounter++){
+            for(lineCounter = 0; (rawDataLine = bufReader.readLine()) != null; lineCounter++){
                 rawDataSublines = rawDataLine.split("\\t");
                 for(int i = 0; i < rawDataSublines.length; i++){
                     reportColumns.get(i)
@@ -63,6 +64,8 @@ public class DataParser {
         } catch (IOException e) {
             e.printStackTrace(System.out);
         }
+
+        return lineCounter;
     }
 
     public List<Column> getReportEntries(){

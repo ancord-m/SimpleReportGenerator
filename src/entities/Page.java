@@ -7,10 +7,12 @@ public class Page {
     private int pageWidth;
     private int pageHeight;
     private StringBuilder horizontalBar;
+    private String lineSeparator;
     private final String PAGE_DELIMITER = "~";
     private final String COLUMN_DLMTR = " | ";
     private final String LEFT_INDENT = "| ";
     private final String RIGHT_INDENT = " |";
+
 
     public Page(){
 
@@ -20,11 +22,12 @@ public class Page {
         this.pageWidth = pageWidth;
         this.pageHeight = pageHeight;
 
+        lineSeparator = System.getProperty("line.separator");
         horizontalBar = new StringBuilder();
         while ( 0 < pageWidth-- ){
             horizontalBar.append("-");
         }
-        horizontalBar.append(System.getProperty("line.separator"));
+        horizontalBar.append(lineSeparator);
     }
 
     public int getPageWidth() {
@@ -51,9 +54,12 @@ public class Page {
         return RIGHT_INDENT + System.getProperty("line.separator");
     }
 
+    public String getLineSeparator(){
+        return lineSeparator;
+    }
+
     public String getNewPage(){
-        return System.getProperty("line.separator")
-                    + PAGE_DELIMITER
-                        + System.getProperty("line.separator");
+        return PAGE_DELIMITER
+                        + lineSeparator;
     }
 }

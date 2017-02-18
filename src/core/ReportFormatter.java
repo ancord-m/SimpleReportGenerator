@@ -16,7 +16,9 @@ import java.util.Queue;
  * заполняет её данными, извлечёнными из исходного файла, предоставленного пользователем.
  */
 public class ReportFormatter {
-    private int charCount;
+    private int linesInHeader;
+    private int numOfLinesPrinted;
+    private int numOfEntries;
     private StringBuilder reportHeader;
     private Page reportPage;
     private List<Column> reportColumns;
@@ -38,7 +40,7 @@ public class ReportFormatter {
 
     public void getRawReportData(String rawDataFile){
         dataParser = new DataParser(rawDataFile, reportColumns, encoding);
-        dataParser.parseData();
+        numOfEntries = dataParser.parseData();
     }
 
 
@@ -55,11 +57,35 @@ public class ReportFormatter {
     }
 
     public void writeDataToReport(){
-        try{
-            //TODO здесь должен быть цикл управляющий разбиением на страницы
-        //    writePageHeader();
-            writePageEntry();
+        boolean allColNotEmpty;
 
+        try{
+            writePageHeader();
+            for(int i = 0; i < numOfEntries; i++) {
+                allColNotEmpty = true;
+                while(allColNotEmpty){
+                    allColNotEmpty = false;
+                    bufWriter.write(reportPage.getLeftIndent());
+                    for (Column col : reportColumns) {
+                        writePartOfColumnEntry(col.getWidth(), col.getEntries().get(i));
+                        allColNotEmpty |= !col.getEntries().get(i).isEmpty();
+                    }
+                    bufWriter.write(reportPage.getLineSeparator());
+                    if(!allColNotEmpty){
+                        bufWriter.write(reportPage.getHorizontalBar());
+                        numOfLinesPrinted++;
+                    }
+                    bufWriter.flush();
+                    numOfLinesPrinted++;
+                    if(linesInHeader + numOfLinesPrinted == reportPage.getPageHeight()){
+                        numOfLinesPrinted = 0;
+                        bufWriter.write(reportPage.getNewPage());
+                        bufWriter.flush();
+                        writePageHeader();
+
+                    }
+                }
+            }
         } catch (IOException e){
             e.printStackTrace(System.out);
         }
@@ -82,9 +108,11 @@ public class ReportFormatter {
      */
     private void constructHeader() throws IOException{
         //TODO RightIndent тащит за собой пробел!
+        int charCount = 0;
         boolean allColNotEmpty = true;
 
         while(allColNotEmpty){
+            allColNotEmpty = false;
             reportHeader.append(reportPage.getLeftIndent());
             for(Column col : reportColumns){
                 charCount = 0;
@@ -103,42 +131,36 @@ public class ReportFormatter {
                     }
                     reportHeader.append(reportPage.getColumnDlmtr());
                 }
-            }
-            reportHeader.append("\r\n");
-
-            allColNotEmpty = false;
-            for(Column col : reportColumns){
                 allColNotEmpty |= !col.getTitle().isEmpty();
             }
+            reportHeader.append(reportPage.getLineSeparator());
+            linesInHeader++;
         }
 
         reportHeader.append(reportPage.getHorizontalBar());
+        linesInHeader++;
     }
 
-    private void writePageEntry() throws IOException{
+    private void writePageEntry(int entryNum) throws IOException{
         boolean allColNotEmpty = true;
 
         while(allColNotEmpty){
             allColNotEmpty = false;
-
-            bufWriter.write(reportPage.getLeftIndent());
-            for(Column col : reportColumns){
-                for(int i = 0; i < col.getEntries().size(); i++) {
-                    writePartOfColumnEntry(col.getWidth(), col.getEntries().get(i));
-                    allColNotEmpty |= !col.getEntries().get(i).isEmpty();
+                bufWriter.write(reportPage.getLeftIndent());
+                for (Column col : reportColumns) {
+                    writePartOfColumnEntry(col.getWidth(), col.getEntries().get(entryNum));
+                    allColNotEmpty |= !col.getEntries().get(entryNum).isEmpty();
                 }
+                bufWriter.write(reportPage.getLineSeparator());
+                numOfLinesPrinted++;
+                bufWriter.flush();
+
+              //  bufWriter.write(reportPage.getNewPage());
+              //  numOfLinesPrinted = 0;
             }
-            bufWriter.write("\r\n");
-            bufWriter.flush();
 
-           /* allColNotEmpty = false;
-            for(Column col : reportColumns){
-                allColNotEmpty |= !col.getEntries().get(4).isEmpty();
-            } */
-        }
-
-        bufWriter.write(reportPage.getHorizontalBar());
-        bufWriter.flush();
+    //    bufWriter.write(reportPage.getHorizontalBar());
+    //    bufWriter.flush();
     }
 
     /**
@@ -147,7 +169,7 @@ public class ReportFormatter {
      * @param columnEntry Часть записи, которую надо поместить в соответствующую колонку.
      */
     private void writePartOfColumnEntry(int width, Queue<Character> columnEntry) throws IOException{
-        charCount = 0;
+        int charCount = 0;
         while( (charCount < width ) & !columnEntry.isEmpty()){
             bufWriter.write(columnEntry.poll());
             charCount++;
@@ -165,11 +187,12 @@ public class ReportFormatter {
         bufWriter.flush();
     }
 
+    /*
     private void writePageHeader2() throws IOException{
 
 
    //     bufWriter.write(reportPage.getLeftIndent());
-        String s = "Experiment";
+    String s = "Experiment";
         String s2 = "Testere";
         Queue<Character> charQueue1 = new ArrayDeque<>();
         Queue<Character> charQueue2 = new ArrayDeque<>();
@@ -222,4 +245,5 @@ public class ReportFormatter {
             bufWriter.flush();
         }
     }
+    */
 }
